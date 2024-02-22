@@ -20,11 +20,13 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    /* fake data generate
     //using (var scope = app.Services.CreateScope())
     //{
     //    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     //    SeedUserData(db); // Call the seed method here
     //}
+    */
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -38,6 +40,7 @@ app.MapControllers();
 
 app.Run();
 
+//fake data generate
 // Data Seeder Method
 //static void SeedUserData(ApplicationDbContext db)
 //{
