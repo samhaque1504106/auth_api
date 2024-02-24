@@ -27,95 +27,7 @@ namespace SignUp_Api.Controllers
 
 
 
-
-
-        //[HttpGet("GetAll_SP")]
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //public IActionResult GetUser([FromQuery] string cursor = "")
-        //{
-        //    /*pagination:
-        //     * 1. Retrieve query parameters(cursor) from request url
-        //     * 2. Is cursor empty? -> If Yes -> 1st page generate. 
-        //     *                                  for that use sql query, returns List of users(Max 20)
-        //     *                                  then calculate next page info:  1. start cursor 2. end cursor 3. has_next_page
-        //     * 3. Is cursor empty? -> If No ->  2nd page start cursor = 1st page end cursor+1
-        //     *                                  again query.
-        //     *                                  calculate same 1. start cursor 2. end cursor 3. has_next_page
-        //     */
-        //    int limit = 20;
-        //    int currentCursor = 0;
-        //    if (string.IsNullOrEmpty(cursor))
-        //    {
-        //        var parameters = new[]
-        //        {
-
-        //            new SqlParameter("@cursor", currentCursor),
-        //            new SqlParameter("@limit", limit)
-        //        };
-
-        //        var users = _db.SignUp.FromSqlRaw("EXEC SP_GetUserNoCursor @cursor, @limit", parameters).ToList();
-
-
-
-        //        // start cursor = users[0].ID
-        //        // len = Length(users)
-        //        // end cursor = users[len-1].ID
-        //        // hasNextPage = with query
-        //        long StartCursor = users[0].Id;
-        //        int len = users.Count;
-        //        long EndCursor = users[len - 1].Id;
-        //        var parameters2 = new[]
-        //        {
-
-        //            new SqlParameter("@EndCursor", EndCursor)
-        //        };
-        //        var NextPage = _db.SignUp.FromSqlRaw("EXEC SP_HasNextPage @EndCursor", parameters2).ToList();
-        //        bool HasNextPage = Convert.ToBoolean(NextPage);
-
-        //        var PageInfo2 = new
-        //        {
-        //            StartCursor = StartCursor,
-        //            EndCursor = EndCursor,
-        //            HasNextPage = HasNextPage,
-
-        //        };
-        //        var res = new
-        //        {
-        //            PageInfo2 = PageInfo2,
-        //            users = users,
-        //        };
-
-
-        //        _logger.LogInformation("getting 20 users from 1st page!");
-        //        return Ok(res);
-        //    }
-
-        //    else
-        //    {
-        //        currentCursor = int.Parse(cursor);
-        //        var parameters = new[]
-        //        {
-        //            new SqlParameter("@cursor", currentCursor),
-        //            new SqlParameter("@limit", limit)
-        //        };
-
-        //        var users = _db.SignUp.FromSqlRaw("EXEC SP_GetUserCursor @cursor, @limit", parameters).ToList();
-
-        //        _logger.LogInformation("getting 20 users from cursored id!");
-        //        return Ok(users);
-        //    }
-
-
-        //    var users2 = _db.SignUp.FromSqlRaw("SP_GetAllUser");
-
-        //    _logger.LogInformation("getiing all users!");
-        //    return Ok(users2);
-        //}
-
-
-        /// <summary>
-        /// /////////
-        [HttpGet("GetAll_SP")]
+        [HttpGet("GetAll_Pagination")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult GetUser([FromQuery] string cursor = "")
@@ -161,12 +73,6 @@ namespace SignUp_Api.Controllers
             }
 
 
-            
-            
-            ////if (string.IsNullOrEmpty(cursor))
-            //{
-                
-
                 string connectionString = _configuration.GetConnectionString("DefaultConnectionStrings");
                 
 
@@ -180,7 +86,7 @@ namespace SignUp_Api.Controllers
                 bool hasNextPage = false;
                 if (users.Any())
                 {
-                    long lastUserId = users.Last().Id; // Assuming the last user's ID is needed for SP_HasNextPage
+                    long lastUserId = users.Last().Id; // last user's ID is needed for SP_HasNextPage
                     using (var connection = new SqlConnection(connectionString))
                     {
                         connection.Open();
@@ -189,7 +95,7 @@ namespace SignUp_Api.Controllers
                             command.CommandType = CommandType.StoredProcedure;
                             command.Parameters.Add(new SqlParameter("@EndCursor", SqlDbType.BigInt) { Value = lastUserId });
 
-                            // Assuming SP_HasNextPage returns a bit (0 or 1) indicating if there is a next page
+                            // SP_HasNextPage returns a bit (0 or 1) indicating if there is a next page
                             hasNextPage = (bool)command.ExecuteScalar();
                         }
                     }
@@ -209,13 +115,8 @@ namespace SignUp_Api.Controllers
                 };
 
                 return Ok(response);
-            //}
+      
 
-
-            var users2 = _db.SignUp.FromSqlRaw("SP_GetAllUser");
-
-            _logger.LogInformation("getiing all users!");
-            return Ok(users2);
         }
       
 
